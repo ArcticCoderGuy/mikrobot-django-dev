@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-ul#t*3gi%7jz)z23*atjxpuitotx@__=b8vx01!s^w8cg+pmvk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -41,9 +42,11 @@ INSTALLED_APPS = [
     # Third party apps
     'rest_framework',
     'corsheaders',
+    'django_filters',
     # 'debug_toolbar',  # Poistettu väliaikaisesti
     
     # Local apps
+    'dashboard',
     'signals',
     'trading',
     'analytics',
@@ -68,7 +71,7 @@ ROOT_URLCONF = 'mikrobot_mcp.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,7 +131,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -156,6 +163,47 @@ CORS_ALLOW_ALL_ORIGINS = True
 #     "http://localhost:3000",  # React dev server
 #     "http://127.0.0.1:3000",
 # ]
+
+# OpenAI API Configuration
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', 'your-openai-key-here')
+
+# LLM Configuration
+LLM_CONFIG = {
+    'model': 'gpt-4',
+    'max_retries': 3,
+    'timeout': 30,
+    'rate_limit_per_minute': 100,
+}
+
+# MetaTrader 5 Configuration
+MT5_CONFIG = {
+    'login': int(os.getenv('MT5_LOGIN', '0')),
+    'password': os.getenv('MT5_PASSWORD', ''),
+    'server': os.getenv('MT5_SERVER', ''),
+    'timeout': 10000,
+    'portable': False,
+    'default_volume': 0.01,
+    'max_volume': 1.0,
+    'deviation': 20,
+    'magic_number': 20250117,
+}
+
+# Kafka Configuration for MCP Integration
+KAFKA_CONFIG = {
+    'bootstrap_servers': os.getenv('KAFKA_SERVERS', 'localhost:9092'),
+    'topic': os.getenv('KAFKA_TOPIC', 'mikrobot_signals'),
+    'group_id': os.getenv('KAFKA_GROUP_ID', 'mikrobot_django'),
+    'auto_offset_reset': 'latest',
+    'enable_auto_commit': True,
+}
+
+# MCP Integration Settings
+MCP_CONFIG = {
+    'hansei_log_file': os.getenv('HANSEI_LOG_FILE', 'hansei_log.json'),
+    'enable_kafka': os.getenv('MCP_ENABLE_KAFKA', 'true').lower() == 'true',
+    'enable_hansei_logging': os.getenv('MCP_ENABLE_HANSEI', 'true').lower() == 'true',
+    'decision_engine_enabled': os.getenv('MCP_DECISION_ENGINE', 'true').lower() == 'true',
+}
 
 # Debug toolbar settings (poistettu väliaikaisesti)
 # INTERNAL_IPS = [

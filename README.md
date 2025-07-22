@@ -8,7 +8,7 @@
 ![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)
 
 ---
-
+voitko 
 ## 📋 Table of Contents
 
 - [🎯 What is MikroBot-MCP?](#-what-is-mikrobot-mcp)

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MikroBot - Next Generation Trading Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        
+        /* Glassmorphism effects */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-dark {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-glow {
+            animation: glow 4s ease-in-out infinite;
+        }
+        
+        .animate-slide-up {
+            animation: slideInUp 1s ease-out forwards;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 1.5s ease-out forwards;
+        }
+        
+        /* Hover effects */
+        .hover-glow {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Parallax background orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+        }
+        
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            top: -300px;
+            right: -300px;
+        }
+        
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            bottom: -200px;
+            left: -200px;
+        }
+        
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            top: 50%;
+            left: 30%;
+        }
+        
+        /* Feature card hover */
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+        
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .feature-icon {
+            transition: all 0.3s ease;
+        }
+        
+        /* CTA button effects */
+        .cta-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Testimonial cards */
+        .testimonial-card {
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-5px) rotateX(5deg);
+        }
+        
+        /* Smooth reveal on scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
+    
+    <!-- Background orbs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="orb orb-1 animate-float"></div>
+        <div class="orb orb-2 animate-float" style="animation-delay: 2s;"></div>
+        <div class="orb orb-3 animate-glow"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center px-6 z-10">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="glass rounded-3xl p-12 md:p-16 animate-fade-in">
+                <!-- Logo -->
+                <div class="mb-8 animate-slide-up">
+                    <img src="/static/images/Mikrobot.jpg" alt="MikroBot" class="w-32 h-32 mx-auto rounded-2xl shadow-2xl hover-glow">
+                </div>
+                
+                <!-- Main heading -->
+                <h1 class="text-6xl md:text-8xl font-thin mb-6 animate-slide-up" style="animation-delay: 0.2s;">
+                    <span class="gradient-text">Mikro</span><span class="text-white font-light">Bot</span>
+                </h1>
+                
+                <!-- Subtitle -->
+                <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto animate-slide-up" style="animation-delay: 0.4s;">
+                    Älykkään kaupankäynnin tulevaisuus.<br>
+                    <span class="text-cyan-400">Microscale precision meets infinite possibilities.</span>
+                </p>
+                
+                <!-- CTA Button -->
+                <div class="animate-slide-up" style="animation-delay: 0.6s;">
+                    <button class="cta-button bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl text-lg font-medium">
+                        <span class="relative z-10 flex items-center justify-center">
+                            Aloita matkasi
+                            <i class="fas fa-chevron-right ml-2"></i>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="relative py-32 px-6 z-10 reveal">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="glass-dark rounded-3xl p-12">
+                <i class="fas fa-sparkles text-6xl text-cyan-400 mb-8"></i>
+                <h2 class="text-4xl md:text-6xl font-thin text-white mb-8">Visiomme</h2>
+                <p class="text-xl text-gray-300 leading-relaxed max-w-4xl mx-auto">
+                    Uskomme, että jokainen kauppias ansaitsee pääsyn instituutioiden tasoisiin työkaluihin. 
+                    MikroBot demokratisoi kvantitatiivisen kaupankäynnin ja tekee siitä saavutettavan kaikille.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="relative py-32 px-6 z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-5xl md:text-7xl font-thin text-white mb-6">Ominaisuudet</h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">Kaupankäynnin tulevaisuus on täällä</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card glass rounded-2xl p-8 reveal">
+                    <div class="feature-icon w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-4">AI-Optimoitu Kaupankäynti</h3>
+                    <p class="text-gray-400 leading-relaxed">Kehittyneet algoritmit analysoivat markkinoita reaaliajassa ja optimoivat kaupankäyntistrategiat jatkuvasti.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card glass rounded-2xl p-8 reveal" style="animation-delay: 0.1s;">
+                    <div class="feature-icon w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-4">Riskinhallinta</h3>
+                    <p class="text-gray-400 leading-relaxed">Monimutkainen riskinhallintajärjestelmä suojaa pääomaa älykkäillä stop-loss ja take-profit -mekanismeilla.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card glass rounded-2xl p-8 reveal" style="animation-delay: 0.2s;">
+                    <div class="feature-icon w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-4">Millisekunnin Nopeus</h3>
+                    <p class="text-gray-400 leading-relaxed">Ultranopeaa toteutusta kehittyneillä algoritmeilla, jotka reagoivat markkinamuutoksiin välittömästi.</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="feature-card glass rounded-2xl p-8 reveal" style="animation-delay: 0.3s;">
+                    <div class="feature-icon w-16 h-16 bg-gradient-to-br from-pink-400 to-orange-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-crosshairs text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-white mb-4">Microscale Precision</h3>
+                    <p class="text-gray-400 leading-relaxed">Erikoistunut pieniin positiokokoihin maksimaalisen tehokkuuden saavuttamiseksi kaikilla markkinatiloilla.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="relative py-32 px-6 z-10">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-5xl md:text-7xl font-thin text-white mb-6">Asiakkaiden ääni</h2>
+                <p class="text-xl text-gray-400">Mitä käyttäjämme sanovat</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card glass rounded-2xl p-8 reveal">
+                    <div class="flex mb-4">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                    </div>
+                    <p class="text-gray-300 text-lg mb-6 leading-relaxed">"MikroBot muutti kaupankäyntini täysin. ROI parani 340% ensimmäisten kuukausien aikana."</p>
+                    <div>
+                        <p class="text-white font-semibold">Mikael Virtanen</p>
+                        <p class="text-gray-400 text-sm">Kvantitatiivinen analyytikko</p>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card glass rounded-2xl p-8 reveal" style="animation-delay: 0.1s;">
+                    <div class="flex mb-4">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                    </div>
+                    <p class="text-gray-300 text-lg mb-6 leading-relaxed">"Riskinhallinta on ensiluokkaista. En ole koskaan tuntenut oloani näin varmaksi markkinoilla."</p>
+                    <div>
+                        <p class="text-white font-semibold">Anna Korhonen</p>
+                        <p class="text-gray-400 text-sm">Päätoiminen kauppias</p>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card glass rounded-2xl p-8 reveal" style="animation-delay: 0.2s;">
+                    <div class="flex mb-4">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                    </div>
+                    <p class="text-gray-300 text-lg mb-6 leading-relaxed">"Instituutiotason työkalut pienen kauppiaan käytössä. Tämä on vallankumous."</p>
+                    <div>
+                        <p class="text-white font-semibold">Jukka Nieminen</p>
+                        <p class="text-gray-400 text-sm">Hedge Fund Manager</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="relative py-32 px-6 z-10">
+        <div class="max-w-4xl mx-auto text-center reveal">
+            <div class="glass-dark rounded-3xl p-12">
+                <h2 class="text-4xl md:text-6xl font-thin text-white mb-8">Valmis aloittamaan?</h2>
+                <p class="text-xl text-gray-300 mb-12 leading-relaxed">
+                    Liity tuhansien kauppiaiden joukkoon, jotka ovat mullistaneet kaupankäyntinsä MikroBotilla.
+                </p>
+                <button class="cta-button bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-12 py-6 rounded-2xl text-xl font-semibold">
+                    <span class="relative z-10 flex items-center justify-center">
+                        Aloita ilmainen kokeilu
+                        <i class="fas fa-arrow-up ml-3 transform rotate-45"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative py-16 px-6 glass-dark border-t border-white/10 z-10">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-8 md:mb-0">
+                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-white">MikroBot</h3>
+                        <p class="text-gray-400 text-sm">Smart Microscale Trading</p>
+                    </div>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <p class="text-gray-400 mb-2">Powered by</p>
+                    <p class="text-white font-semibold">Fox-In-The-Code</p>
+                    <p class="text-gray-500 text-sm mt-2">© 2025 All rights reserved</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Reveal animations on scroll
+        const reveals = document.querySelectorAll('.reveal');
+        
+        function checkReveal() {
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', checkReveal);
+        checkReveal(); // Check on load
+        
+        // Parallax effect for orbs
+        document.addEventListener('mousemove', (e) => {
+            const orbs = document.querySelectorAll('.orb');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            orbs.forEach((orb, index) => {
+                const speed = (index + 1) * 10;
+                const xPos = (x - 0.5) * speed;
+                const yPos = (y - 0.5) * speed;
+                
+                orb.style.transform = `translate(${xPos}px, ${yPos}px)`;
+            });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

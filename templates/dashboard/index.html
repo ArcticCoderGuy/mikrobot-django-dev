@@ -1,0 +1,546 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MikroBot - Trading Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="{% static 'css/themes.css' %}" rel="stylesheet">
+    <script src="{% static 'js/theme-manager.js' %}" defer></script>
+    <style>
+        .card-hover {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .status-online { 
+            background-color: #10b981;
+            animation: pulse-green 2s infinite;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        
+        .status-offline { 
+            background-color: #ef4444;
+            animation: pulse-red 1.5s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        .status-warning { 
+            background-color: #f59e0b;
+            animation: pulse-yellow 1s infinite;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+            }
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.15);
+                opacity: 0.7;
+            }
+        }
+        
+        @keyframes pulse-yellow {
+            0%, 100% { 
+                background-color: #f59e0b;
+            }
+            50% { 
+                background-color: #fbbf24;
+            }
+        }
+        
+        .status-indicator:hover {
+            transform: scale(1.3);
+        }
+        
+        /* Heartbeat animation - 63 BPM (0.95s per beat) */
+        .heartbeat {
+            animation: heartbeat 0.952s infinite;
+            color: #10b981;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+        }
+        
+        @keyframes heartbeat {
+            0%, 10%, 20%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+            }
+            5% {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8));
+            }
+            15% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.7));
+            }
+        }
+        
+        /* System health indicator */
+        .system-health {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .health-pulse {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: health-pulse 0.952s infinite;
+        }
+        
+        @keyframes health-pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="mikrobot-logo">
+                            <img src="{% static 'images/Mikrobot.jpg' %}" alt="MikroBot" class="w-16 h-16">
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">MikroBot</h1>
+                            <p class="text-sm text-gray-600">Trading Platform v2.0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900">Django + MT5 Integration</div>
+                        <div class="text-xs text-gray-600">Fully Operational</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold mb-2">Tervetuloa MikroBot -alustalle!</h2>
+                    <p class="text-blue-100 text-lg">Automaattinen kaupankäyntijärjestelmä MetaTrader 5:lle</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-bold">{{ account_info.balance|default:"Demo" }}</div>
+                    <div class="text-blue-200">Account Balance</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QA Automation Status -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-robot mr-3 text-purple-600"></i>
+                    QA Automation Status
+                </h3>
+                {% if qa_status.status == 'PASS' %}
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">✅ ALL TESTS PASS</span>
+                {% elif qa_status.status == 'FAIL' %}
+                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">❌ TESTS FAILING</span>
+                {% else %}
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">⚠️ {{ qa_status.status }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold {% if qa_status.pass_rate >= 80 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ qa_status.pass_rate|default:"--" }}%
+                    </div>
+                    <div class="text-sm text-gray-600">Pass Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-medium text-gray-900">{{ qa_status.message|default:"No data" }}</div>
+                    <div class="text-sm text-gray-600">Test Results</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-medium text-gray-900">
+                        {% if qa_status.last_run %}
+                            {{ qa_status.last_run|date:"H:i" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-600">Last Run</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-lg font-medium text-blue-600">{{ qa_status.next_run_in|default:"Unknown" }}</div>
+                    <div class="text-sm text-gray-600">Next Run</div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <div class="text-sm text-gray-600">
+                    🔄 Automaattiset testit pyörivät 15 minuutin välein taustalla. 
+                    Viimeisin testi: 
+                    {% if qa_status.is_recent %}
+                        <span class="text-green-600 font-medium">Tuore ({{ qa_status.time_since_last_minutes }} min sitten)</span>
+                    {% else %}
+                        <span class="text-orange-600 font-medium">Vanhentunut</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <div class="system-health mb-4">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-heartbeat mr-3 heartbeat"></i>
+                    Järjestelmän Tila
+                </h3>
+                <div class="flex items-center ml-auto">
+                    <div class="health-pulse"></div>
+                    <span class="text-sm text-green-600 font-medium ml-2">63 BPM</span>
+                    <span class="text-xs text-gray-500 ml-2">Healthy</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="text-center p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" title="Django Web Server - Core system running">
+                    <div class="status-indicator status-online"></div>
+                    <div class="font-medium">Django</div>
+                    <div class="text-xs text-gray-500">Web Server</div>
+                    <div class="text-xs text-green-600 mt-1">●ONLINE</div>
+                </div>
+                <div class="text-center p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" title="MetaTrader 5 - Trading platform connection">
+                    <div class="status-indicator {% if system_status.mt5 %}status-online{% else %}status-offline{% endif %}"></div>
+                    <div class="font-medium">MetaTrader 5</div>
+                    <div class="text-xs text-gray-500">Trading Platform</div>
+                    <div class="text-xs {% if system_status.mt5 %}text-green-600{% else %}text-red-600{% endif %} mt-1">
+                        {% if system_status.mt5 %}●CONNECTED{% else %}●OFFLINE{% endif %}
+                    </div>
+                </div>
+                <div class="text-center p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" title="PURE EA - Signal detection system">
+                    <div class="status-indicator {% if system_status.pure_ea %}status-online{% else %}status-warning{% endif %}"></div>
+                    <div class="font-medium">PURE EA</div>
+                    <div class="text-xs text-gray-500">Signal Detector</div>
+                    <div class="text-xs {% if system_status.pure_ea %}text-green-600{% else %}text-yellow-600{% endif %} mt-1">
+                        {% if system_status.pure_ea %}●ACTIVE{% else %}●STANDBY{% endif %}
+                    </div>
+                </div>
+                <div class="text-center p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" title="LLM Agent - Signal analysis AI">
+                    <div class="status-indicator {% if system_status.llm %}status-online{% else %}status-warning{% endif %}"></div>
+                    <div class="font-medium">LLM Agent</div>
+                    <div class="text-xs text-gray-500">Signal Analysis</div>
+                    <div class="text-xs {% if system_status.llm %}text-green-600{% else %}text-yellow-600{% endif %} mt-1">
+                        {% if system_status.llm %}●READY{% else %}●MOCK{% endif %}
+                    </div>
+                </div>
+                <div class="text-center p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" title="MCP - Model Context Protocol">
+                    <div class="status-indicator {% if system_status.mcp %}status-online{% else %}status-warning{% endif %}"></div>
+                    <div class="font-medium">MCP</div>
+                    <div class="text-xs text-gray-500">Context Protocol</div>
+                    <div class="text-xs {% if system_status.mcp %}text-green-600{% else %}text-yellow-600{% endif %} mt-1">
+                        {% if system_status.mcp %}●LIVE{% else %}●DEMO{% endif %}
+                    </div>
+                </div>
+                <div class="text-center p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" title="Database - Data persistence layer">
+                    <div class="status-indicator status-online"></div>
+                    <div class="font-medium">Database</div>
+                    <div class="text-xs text-gray-500">PostgreSQL</div>
+                    <div class="text-xs text-green-600 mt-1">●ACTIVE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Main Dashboard -->
+            <a href="{% url 'dashboard:dashboard' %}" class="card-hover">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-900">Main Dashboard</h4>
+                            <p class="text-gray-600 text-sm">Kaupankäynnin yleiskatsaus</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Aktiiviset kaupat:</span>
+                            <span class="font-medium">{{ active_trades_count|default:"0" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Signaalit tänään:</span>
+                            <span class="font-medium">{{ signals_today|default:"3" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Settings -->
+            <a href="{% url 'dashboard:settings' %}" class="card-hover">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-cog text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-900">Settings</h4>
+                            <p class="text-gray-600 text-sm">Kaupankäyntiasetukset</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Valuuttapari:</span>
+                            <span class="font-medium">{{ user_settings.currency_pair|default:"EURUSD" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Riski:</span>
+                            <span class="font-medium">{{ user_settings.risk_percentage|default:"1.0" }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- QA Dashboard -->
+            <a href="{% url 'dashboard:qa_dashboard' %}" class="card-hover">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-flask text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-bold text-gray-900">QA Dashboard</h4>
+                            <p class="text-gray-600 text-sm">Testauksen hallinta</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm mb-4">
+                        <!-- Debug: QA Status Available -->
+                        {% if qa_status %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Testien tila:</span>
+                            <span class="font-medium {% if qa_status.status == 'PASS' %}text-green-600{% elif qa_status.status == 'FAIL' %}text-red-600{% else %}text-yellow-600{% endif %}">
+                                {{ qa_status.message|default:"No data" }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Pass Rate:</span>
+                            <span class="font-medium text-green-600">{{ qa_status.pass_rate|default:"0" }}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Viimeksi ajettu:</span>
+                            <span class="font-medium text-gray-700">
+                                {% if qa_status.last_run %}
+                                    {{ qa_status.last_run|date:"H:i" }}
+                                {% else %}
+                                    Ei koskaan
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-red-600 font-medium">
+                            QA Status not available
+                        </div>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'dashboard:run_qa_tests' %}" class="inline-block w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-play mr-2"></i>Run Tests Now
+                    </a>
+                </div>
+            </a>
+        </div>
+
+        <!-- API Endpoints -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-code mr-3 text-orange-600"></i>
+                API Endpoints
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Signals API</h4>
+                    <div class="space-y-1 text-sm font-mono bg-gray-50 p-3 rounded-lg">
+                        <div><a href="/api/v1/signals/" class="text-blue-600 hover:underline">GET /api/v1/signals/</a></div>
+                        <div><a href="/api/v1/signals/pending/" class="text-blue-600 hover:underline">GET /api/v1/signals/pending/</a></div>
+                        <div><a href="/api/v1/signals/stats/" class="text-blue-600 hover:underline">GET /api/v1/signals/stats/</a></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Trades API</h4>
+                    <div class="space-y-1 text-sm font-mono bg-gray-50 p-3 rounded-lg">
+                        <div><a href="/api/v1/trades/" class="text-blue-600 hover:underline">GET /api/v1/trades/</a></div>
+                        <div><a href="/api/v1/trades/active_trades/" class="text-blue-600 hover:underline">GET /api/v1/trades/active_trades/</a></div>
+                        <div><a href="/api/v1/trades/statistics/" class="text-blue-600 hover:underline">GET /api/v1/trades/statistics/</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-shield-alt mr-3 text-red-600"></i>
+                Hallinta
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="/admin/" class="flex items-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                    <i class="fas fa-user-shield text-red-600 mr-3"></i>
+                    <div>
+                        <div class="font-medium">Django Admin</div>
+                        <div class="text-sm text-gray-600">Tietokannan hallinta</div>
+                    </div>
+                </a>
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <i class="fas fa-database text-gray-600 mr-3"></i>
+                    <div>
+                        <div class="font-medium">Database</div>
+                        <div class="text-sm text-gray-600">{{ signals_count|default:"3" }} signaalit, {{ trades_count|default:"1" }} kauppa</div>
+                    </div>
+                </div>
+                <div class="flex items-center p-4 bg-green-50 rounded-lg">
+                    <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                    <div>
+                        <div class="font-medium">System Ready</div>
+                        <div class="text-sm text-gray-600">Kaikki komponentit toimii</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // System Health Monitor - Dynamic heartbeat
+        class SystemHealthMonitor {
+            constructor() {
+                this.currentBPM = 63; // Normal resting rate
+                this.heartbeat = document.querySelector('.heartbeat');
+                this.pulseIndicator = document.querySelector('.health-pulse');
+                this.bpmDisplay = document.querySelector('.system-health span.text-green-600');
+                this.healthStatus = document.querySelector('.system-health span.text-gray-500');
+                
+                this.updateHeartbeat();
+                this.startMonitoring();
+            }
+            
+            updateHeartbeat() {
+                // Calculate animation duration: 60/BPM seconds per beat
+                const duration = 60 / this.currentBPM;
+                
+                if (this.heartbeat) {
+                    this.heartbeat.style.animationDuration = `${duration}s`;
+                }
+                if (this.pulseIndicator) {
+                    this.pulseIndicator.style.animationDuration = `${duration}s`;
+                }
+                if (this.bpmDisplay) {
+                    this.bpmDisplay.textContent = `${this.currentBPM} BPM`;
+                }
+            }
+            
+            setSystemLoad(load) {
+                // Adjust heartbeat based on system load (0-100%)
+                let newBPM;
+                let status;
+                let color;
+                
+                if (load < 30) {
+                    newBPM = 60 + Math.random() * 6; // 60-66 BPM (resting)
+                    status = 'Healthy';
+                    color = '#10b981';
+                } else if (load < 70) {
+                    newBPM = 70 + Math.random() * 10; // 70-80 BPM (active)
+                    status = 'Active';
+                    color = '#3b82f6';
+                } else {
+                    newBPM = 85 + Math.random() * 15; // 85-100 BPM (stressed)
+                    status = 'High Load';
+                    color = '#f59e0b';
+                }
+                
+                this.currentBPM = Math.round(newBPM);
+                this.updateHeartbeat();
+                
+                if (this.healthStatus) {
+                    this.healthStatus.textContent = status;
+                    this.healthStatus.style.color = color;
+                }
+            }
+            
+            startMonitoring() {
+                // Simulate system load changes every 30 seconds
+                setInterval(() => {
+                    const simulatedLoad = Math.random() * 60; // 0-60% load
+                    this.setSystemLoad(simulatedLoad);
+                }, 30000);
+                
+                // Small heartbeat variations every 5 seconds
+                setInterval(() => {
+                    const variation = (Math.random() - 0.5) * 4; // ±2 BPM
+                    const baseBPM = this.currentBPM;
+                    this.currentBPM = Math.max(55, Math.min(100, baseBPM + variation));
+                    this.updateHeartbeat();
+                }, 5000);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const healthMonitor = new SystemHealthMonitor();
+            
+            // Demo: Click heartbeat to simulate stress
+            const heartbeat = document.querySelector('.heartbeat');
+            if (heartbeat) {
+                let clickCount = 0;
+                heartbeat.addEventListener('click', function() {
+                    clickCount++;
+                    const stressLevel = Math.min(100, clickCount * 20);
+                    healthMonitor.setSystemLoad(stressLevel);
+                    
+                    // Reset after 10 seconds
+                    setTimeout(() => {
+                        clickCount = Math.max(0, clickCount - 1);
+                    }, 10000);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

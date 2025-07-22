@@ -1,0 +1,327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MikroBot Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/themes.css' %}" rel="stylesheet">
+    <script src="{% static 'js/theme-manager.js' %}" defer></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="mikrobot-logo">
+                            <img src="{% static 'images/Mikrobot.jpg' %}" alt="MikroBot" class="w-16 h-16">
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">MikroBot</h1>
+                            <p class="text-sm text-gray-500">Settings</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="{% url 'dashboard:dashboard' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Navigation -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 flex space-x-4">
+            <a href="{% url 'dashboard:index' %}" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">🏠 Home</a>
+            <a href="{% url 'dashboard:dashboard' %}" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">📊 Original Dashboard</a>
+            <a href="{% url 'dashboard:functional_design' %}" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">✨ Functional Design</a>
+            <a href="{% url 'dashboard:settings' %}" class="px-4 py-2 rounded-lg bg-green-600 text-white">⚙️ Settings</a>
+            <a href="{% url 'dashboard:qa_dashboard' %}" class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">🧪 QA</a>
+        </div>
+        
+        <!-- Page Title -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <i class="fas fa-cog text-blue-600"></i>
+                Trading Settings
+            </h2>
+            <p class="text-gray-600 mt-2">Configure your trading parameters and preferences</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 border border-green-200 text-green-800{% else %}bg-red-50 border border-red-200 text-red-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Settings Form -->
+        <form method="POST" action="{% url 'dashboard:settings' %}">
+            {% csrf_token %}
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                <!-- Currency Pair Settings -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-coins text-yellow-400"></i>
+                        Currency Pair Settings
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Current Trading Pair</label>
+                            <select name="currency_pair" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+                                {% for symbol in available_symbols %}
+                                    <option value="{{ symbol }}" {% if symbol == current_symbol %}selected{% endif %}>
+                                        {{ symbol }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-600 mt-1">Select the currency pair for trading signals</p>
+                        </div>
+                        
+                        <div class="bg-green-900/30 border border-green-600/50 rounded-lg p-3">
+                            <p class="text-sm text-green-300">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <strong>Active:</strong> Settings will be saved to your profile.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Management -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-shield-alt text-green-400"></i>
+                        Risk Management
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Risk Per Trade (%)</label>
+                            <select name="risk_percentage" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+                                {% for risk in risk_options %}
+                                    <option value="{{ risk }}" {% if risk == risk_percentage %}selected{% endif %}>
+                                        {{ risk }}%
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-600 mt-1">Maximum account percentage to risk per trade</p>
+                        </div>
+                        
+                        <div class="bg-blue-900/30 border border-blue-600/50 rounded-lg p-3">
+                            <p class="text-sm">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Current risk: <strong>{{ risk_percentage }}%</strong> of account balance
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stop Loss Settings -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-stop-circle text-orange-400"></i>
+                        Stop Loss Settings
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Fibonacci Level</label>
+                            <select name="stop_loss_level" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+                                {% for sl in stop_loss_options %}
+                                    <option value="{{ sl }}" {% if sl == stop_loss_level %}selected{% endif %}>
+                                        {{ sl }} (Fibonacci)
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-600 mt-1">Fibonacci retracement level for stop loss</p>
+                        </div>
+                        
+                        <div class="bg-orange-900/30 border border-orange-600/50 rounded-lg p-3">
+                            <p class="text-sm text-orange-300">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Current SL: <strong>{{ stop_loss_level }}</strong> Fibonacci level
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- R:R Strategy Settings -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-blue-400"></i>
+                        R:R Strategy Settings
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Weekly Profit Threshold (%)</label>
+                            <select name="weekly_profit_threshold" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+                                {% for threshold in weekly_threshold_options %}
+                                    <option value="{{ threshold }}" {% if threshold == weekly_profit_threshold %}selected{% endif %}>
+                                        {{ threshold }}% (1:2 upgrade)
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-600 mt-1">Weekly profit % for 1:2 R:R upgrade</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Break-Even Buffer (pips)</label>
+                            <select name="break_even_buffer_pips" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500">
+                                {% for buffer in buffer_pips_options %}
+                                    <option value="{{ buffer }}" {% if buffer == break_even_buffer_pips %}selected{% endif %}>
+                                        {{ buffer }} pips
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-600 mt-1">Buffer for break-even at 1:1 + pips</p>
+                        </div>
+                        
+                        <div class="bg-blue-900/30 border border-blue-600/50 rounded-lg p-3">
+                            <p class="text-sm text-blue-300">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>Strategy:</strong> 1:1 → BE+{{ break_even_buffer_pips }}p, {{ weekly_profit_threshold }}% weekly → 1:2 R:R
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Sessions -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-globe text-green-400"></i>
+                        Trading Sessions
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium">🇬🇧 London Session</label>
+                                <p class="text-xs text-gray-600">10:00 - 19:00 EET</p>
+                            </div>
+                            <input type="checkbox" name="trade_london" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if trade_london %}checked{% endif %}>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium">🇺🇸 New York Session</label>
+                                <p class="text-xs text-gray-600">15:30 - 00:30 EET</p>
+                            </div>
+                            <input type="checkbox" name="trade_new_york" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if trade_new_york %}checked{% endif %}>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium">🇯🇵 Tokyo Session</label>
+                                <p class="text-xs text-gray-600">03:00 - 12:00 EET</p>
+                            </div>
+                            <input type="checkbox" name="trade_tokyo" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if trade_tokyo %}checked{% endif %}>
+                        </div>
+                        
+                        <div class="bg-green-900/30 border border-green-600/50 rounded-lg p-3">
+                            <p class="text-sm text-green-300">
+                                <i class="fas fa-clock mr-2"></i>
+                                <strong>Active Sessions:</strong> 
+                                {% if trade_london %}London{% endif %}{% if trade_london and trade_new_york %}, {% endif %}{% if trade_new_york %}New York{% endif %}{% if trade_tokyo %}{% if trade_london or trade_new_york %}, {% endif %}Tokyo{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-bell text-yellow-400"></i>
+                        Notification Settings
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Email -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium">📧 Email Notifications</label>
+                                <input type="checkbox" name="notification_email_enabled" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if notification_email_enabled %}checked{% endif %}>
+                            </div>
+                            <input type="email" name="notification_email" value="{{ notification_email }}" placeholder="your.email@example.com" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 text-sm">
+                        </div>
+                        
+                        <!-- MetaQuotes -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium">📱 MetaQuotes Push</label>
+                                <input type="checkbox" name="metaquotes_enabled" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if metaquotes_enabled %}checked{% endif %}>
+                            </div>
+                            <input type="text" name="metaquotes_id" value="{{ metaquotes_id }}" placeholder="12345678" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 text-sm">
+                        </div>
+                        
+                        <!-- Telegram -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium">💬 Telegram</label>
+                                <input type="checkbox" name="telegram_enabled" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if telegram_enabled %}checked{% endif %}>
+                            </div>
+                            <input type="text" name="telegram_username" value="{{ telegram_username }}" placeholder="username (without @)" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 text-sm">
+                        </div>
+                        
+                        <!-- SMS -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-sm font-medium">📞 SMS (Emergency)</label>
+                                <input type="checkbox" name="sms_enabled" class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500" {% if sms_enabled %}checked{% endif %}>
+                            </div>
+                            <input type="tel" name="sms_phone" value="{{ sms_phone }}" placeholder="+358401234567" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 text-sm">
+                        </div>
+                        
+                        <div class="bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3">
+                            <p class="text-sm text-yellow-300">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                <strong>Active:</strong> 
+                                {% if notification_email_enabled %}Email{% endif %}{% if metaquotes_enabled %}{% if notification_email_enabled %}, {% endif %}MT5{% endif %}{% if telegram_enabled %}{% if notification_email_enabled or metaquotes_enabled %}, {% endif %}Telegram{% endif %}{% if sms_enabled %}{% if notification_email_enabled or metaquotes_enabled or telegram_enabled %}, {% endif %}SMS{% endif %}
+                                {% if not notification_email_enabled and not metaquotes_enabled and not telegram_enabled and not sms_enabled %}None{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Status -->
+            <div class="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <i class="fas fa-tasks text-purple-400"></i>
+                    Development Roadmap
+                </h2>
+                <ul class="space-y-2 text-gray-700">
+                    <li><i class="fas fa-clock text-yellow-400 mr-2"></i>Advanced risk calculator - Coming soon</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-6 flex gap-4">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    <i class="fas fa-save mr-2"></i>Save Settings
+                </button>
+                <button type="reset" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition">
+                    <i class="fas fa-undo mr-2"></i>Reset Form
+                </button>
+                <a href="{% url 'dashboard:functional_design' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition inline-flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Functional Design
+                </a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

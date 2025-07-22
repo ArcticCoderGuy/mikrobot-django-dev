@@ -1,0 +1,28 @@
+[
+  {
+    "timestamp": "2025-07-21T11:27:22.802049",
+    "event_type": "SIGNAL_RECEIVED",
+    "data": {
+      "signal_id": "0a85bed2-30da-4716-856b-ca64d56fc470",
+      "symbol": "EURUSD",
+      "direction": "BUY",
+      "entry_price": 1.165,
+      "source": "django",
+      "signal_strength": "strong",
+      "timestamp": "2025-07-21T08:53:22.180183+00:00"
+    }
+  },
+  {
+    "timestamp": "2025-07-21T11:27:22.804435",
+    "event_type": "MCP_DECISION",
+    "data": {
+      "signal_id": "0a85bed2-30da-4716-856b-ca64d56fc470",
+      "symbol": "EURUSD",
+      "action": "IGNORE",
+      "confidence": 0.3,
+      "reasoning": "Poor risk-reward ratio: 1.0",
+      "risk_score": null,
+      "timestamp": "2025-07-21T11:27:22.803886+00:00"
+    }
+  }
+]

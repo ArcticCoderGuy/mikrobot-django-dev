@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MikroBot - Smart Microscale Trading Platform | Fox-In-The-Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .smooth-enter {
+            animation: slideInUp 0.8s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .number-counter {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background-color: #10b981; }
+        .status-offline { background-color: #ef4444; }
+        .status-pending { background-color: #f59e0b; }
+        
+        .trading-chart {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+        
+        .logo-glow {
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+            border: 1px solid rgba(34, 211, 238, 0.5);
+        }
+        
+        .signal-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .signal-item:hover {
+            border-left-color: #22d3ee;
+            background: rgba(34, 211, 238, 0.05);
+        }
+        
+        .trade-row {
+            transition: all 0.2s ease;
+        }
+        
+        .trade-row:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .timeframe-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .timeframe-h1-m15 { background: #10b981; color: white; }
+        .timeframe-m15-m5 { background: #f59e0b; color: white; }
+        .timeframe-m5-m1 { background: #ef4444; color: white; }
+        .timeframe-d1-h4 { background: #8b5cf6; color: white; }
+        .timeframe-h4-h1 { background: #6366f1; color: white; }
+        .timeframe-m15-m3 { background: #ec4899; color: white; }
+        
+        .rr-strategy-1-1 { background: #f59e0b; color: white; }
+        .rr-strategy-1-2 { background: #10b981; color: white; }
+        .rr-strategy-upgraded { background: #22d3ee; color: white; }
+        
+        .robot-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: white;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        
+        .process-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            overflow-x: auto;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .process-step {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 140px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .process-step:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        
+        .process-step.active {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .process-arrow {
+            font-size: 1.5rem;
+            color: #3b82f6;
+            margin: 0 10px;
+        }
+        
+        .weekly-performance {
+            background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .weekly-performance.positive {
+            background: linear-gradient(135deg, #d1fae5 0%, #10b981 100%);
+            border-color: #10b981;
+            color: white;
+        }
+        
+        .break-even-indicator {
+            background: linear-gradient(135deg, #e0e7ff 0%, #6366f1 100%);
+            border: 1px solid #6366f1;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .fox-branding {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: right;
+        }
+        
+        .fox-branding a {
+            color: #1e3c72;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .fox-branding a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .process-flow {
+                flex-direction: column;
+            }
+            
+            .process-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // Enhanced mock data based on manual specifications
+        const mockData = {
+            accountInfo: {
+                balance: 10000.00,
+                equity: 10245.67,
+                margin: 150.00,
+                freeMargin: 10095.67,
+                marginLevel: 6830.45,
+                profit: 245.67,
+                weeklyPerformance: {
+                    EURUSD: { pct: 12.3, trades: 4, upgraded: true },
+                    GBPUSD: { pct: 8.5, trades: 3, upgraded: false },
+                    USDJPY: { pct: 15.2, trades: 5, upgraded: true }
+                }
+            },
+            systemStatus: {
+                django: true,
+                mt5: true,
+                mcp: true,
+                llm: true,
+                pure_ea: true,
+                timeframe_sync: true
+            },
+            processFlow: [
+                { id: 'pure_ea', name: 'PURE EA', status: 'active', icon: '🎯', desc: 'H1 BOS → M15 Retest' },
+                { id: 'django', name: 'Django', status: 'active', icon: '🌐', desc: 'Webhook Reception' },
+                { id: 'llm', name: 'LLM', status: 'processing', icon: '🤖', desc: 'GPT-4 Analysis' },
+                { id: 'mcp', name: 'MCP', status: 'pending', icon: '🧠', desc: 'Decision Engine' },
+                { id: 'mt5', name: 'MT5', status: 'pending', icon: '📈', desc: 'Trade Execution' }
+            ],
+            trades: [
+                {
+                    id: 1,
+                    symbol: 'EURUSD',
+                    type: 'BUY',
+                    volume: 0.01,
+                    openPrice: 1.0850,
+                    currentPrice: 1.0867,
+                    stopLoss: 1.0800,
+                    takeProfit: 1.0950,
+                    profit: 17.00,
+                    status: 'opened',
+                    openTime: '2025-01-18 19:30:00',
+                    timeframe: 'H1/M15',
+                    rrStrategy: '1:2',
+                    breakEven: 1.0870,
+                    weeklyPnl: 12.3
+                },
+                {
+                    id: 2,
+                    symbol: 'GBPUSD',
+                    type: 'SELL',
+                    volume: 0.01,
+                    openPrice: 1.2750,
+                    currentPrice: 1.2745,
+                    stopLoss: 1.2800,
+                    takeProfit: 1.2650,
+                    profit: 5.00,
+                    status: 'opened',
+                    openTime: '2025-01-18 19:15:00',
+                    timeframe: 'M15/M5',
+                    rrStrategy: '1:1',
+                    breakEven: null,
+                    weeklyPnl: 8.5
+                }
+            ],
+            signals: [
+                {
+                    id: 1,
+                    symbol: 'EURUSD',
+                    direction: 'BUY',
+                    strength: 0.85,
+                    entry: 1.0850,
+                    sl: 1.0800,
+                    tp: 1.0950,
+                    status: 'approved',
+                    timestamp: '2025-01-18 19:45:00',
+                    timeframe: 'H1/M15',
+                    rrStrategy: '1:2',
+                    weeklyPerformance: 12.3,
+                    llmAnalysis: {
+                        reasoning: 'Strong H1 BOS with clean M15 retest. Using 1:2 R:R based on 12.3% weekly performance.',
+                        confidence: 0.87,
+                        breakEvenPrice: 1.0870,
+                        halfwayTp: 1.0900
+                    }
+                },
+                {
+                    id: 2,
+                    symbol: 'GBPJPY',
+                    direction: 'SELL',
+                    strength: 0.92,
+                    entry: 189.50,
+                    sl: 190.00,
+                    tp: 188.00,
+                    status: 'pending',
+                    timestamp: '2025-01-18 19:42:00',
+                    timeframe: 'M15/M5',
+                    rrStrategy: '1:1',
+                    weeklyPerformance: 4.2,
+                    llmAnalysis: {
+                        reasoning: 'Clean M15 rejection at resistance. Using 1:1 R:R as weekly performance is 4.2%.',
+                        confidence: 0.73,
+                        breakEvenPrice: null,
+                        halfwayTp: null
+                    }
+                }
+            ],
+            notifications: [
+                {
+                    id: 1,
+                    type: 'rr_upgrade',
+                    title: 'R:R Strategy Upgraded - EURUSD',
+                    message: '🎯 EURUSD R:R STRATEGY UPGRADED! Weekly profit 12.3% ≥ 10% → Now using 1:2 R:R with break-even logic',
+                    timestamp: '2025-01-18 14:30:00',
+                    read: false
+                },
+                {
+                    id: 2,
+                    type: 'timeframe_change',
+                    title: 'Timeframe Updated - GBPUSD',
+                    message: 'PURE EA timeframe changed to M15/M5 for enhanced scalping',
+                    timestamp: '2025-01-18 13:15:00',
+                    read: true
+                }
+            ]
+        };
+
+        // API Functions
+        const apiCall = async (endpoint, options = {}) => {
+            const baseURL = 'http://localhost:8000';
+            const url = `${baseURL}${endpoint}`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Call failed:', error);
+                throw error;
+            }
+        };
+
+        // Header Component
+        const Header = ({ systemStatus, notifications, onRefresh }) => {
+            const [showNotifications, setShowNotifications] = useState(false);
+            const unreadCount = notifications.filter(n => !n.read).length;
+            
+            return (
+                <header className="bg-white shadow-lg border-b border-gray-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-20">
+                            <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                    <div className="robot-icon">
+                                        <i className="fas fa-robot"></i>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-900">MikroBot</h1>
+                                        <p className="text-sm text-gray-500">Smart Microscale Trading</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-6">
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex items-center text-sm">
+                                        <div className={`status-indicator ${systemStatus.django ? 'status-online' : 'status-offline'}`}></div>
+                                        <span className="text-gray-700">Django</span>
+                                    </div>
+                                    <div className="flex items-center text-sm">
+                                        <div className={`status-indicator ${systemStatus.mt5 ? 'status-online' : 'status-offline'}`}></div>
+                                        <span className="text-gray-700">MT5</span>
+                                    </div>
+                                    <div className="flex items-center text-sm">
+                                        <div className={`status-indicator ${systemStatus.mcp ? 'status-online' : 'status-offline'}`}></div>
+                                        <span className="text-gray-700">MCP</span>
+                                    </div>
+                                    <div className="flex items-center text-sm">
+                                        <div className={`status-indicator ${systemStatus.llm ? 'status-online' : 'status-offline'}`}></div>
+                                        <span className="text-gray-700">LLM</span>
+                                    </div>
+                                    <div className="flex items-center text-sm">
+                                        <div className={`status-indicator ${systemStatus.pure_ea ? 'status-online' : 'status-offline'}`}></div>
+                                        <span className="text-gray-700">PURE EA</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowNotifications(!showNotifications)}
+                                        className="relative p-2 text-gray-600 hover:text-gray-900"
+                                    >
+                                        <i className="fas fa-bell text-xl"></i>
+                                        {unreadCount > 0 && (
+                                            <span className="notification-badge">{unreadCount}</span>
+                                        )}
+                                    </button>
+                                    
+                                    {showNotifications && (
+                                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                                            <div className="p-4 border-b border-gray-200">
+                                                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                                            </div>
+                                            <div className="max-h-96 overflow-y-auto">
+                                                {notifications.map(notification => (
+                                                    <div key={notification.id} className={`p-4 border-b border-gray-100 ${!notification.read ? 'bg-blue-50' : ''}`}>
+                                                        <div className="flex items-start space-x-3">
+                                                            <div className="flex-shrink-0">
+                                                                <i className={`fas ${notification.type === 'rr_upgrade' ? 'fa-arrow-up text-green-500' : 'fa-clock text-blue-500'}`}></i>
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                                                                <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                                                                <p className="text-xs text-gray-400 mt-1">{notification.timestamp}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                <button
+                                    onClick={onRefresh}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                                >
+                                    <i className="fas fa-sync-alt"></i>
+                                    <span>Refresh</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        // Process Flow Component
+        const ProcessFlow = ({ processFlow }) => (
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 card-hover smooth-enter">
+                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i className="fas fa-project-diagram mr-3 text-purple-600"></i>
+                    Trading Process Flow
+                </h2>
+                
+                <div className="process-flow">
+                    {processFlow.map((step, index) => (
+                        <React.Fragment key={step.id}>
+                            <div className={`process-step ${step.status === 'active' ? 'active' : ''}`}>
+                                <div className="text-2xl mb-2">{step.icon}</div>
+                                <div className="font-bold text-gray-900">{step.name}</div>
+                                <div className="text-sm text-gray-600 mt-1">{step.desc}</div>
+                                <div className="mt-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        step.status === 'active' ? 'bg-green-100 text-green-800' :
+                                        step.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-gray-100 text-gray-800'
+                                    }`}>
+                                        {step.status}
+                                    </span>
+                                </div>
+                            </div>
+                            {index < processFlow.length - 1 && (
+                                <div className="process-arrow">→</div>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // Account Summary Component
+        const AccountSummary = ({ accountInfo }) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="metric-card card-hover rounded-2xl p-6 text-white smooth-enter">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-300 text-sm">Balance</p>
+                            <p className="text-2xl font-bold number-counter">${accountInfo.balance.toFixed(2)}</p>
+                        </div>
+                        <div className="bg-blue-500 p-3 rounded-full">
+                            <i className="fas fa-wallet text-white"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="metric-card card-hover rounded-2xl p-6 text-white smooth-enter">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-300 text-sm">Equity</p>
+                            <p className="text-2xl font-bold number-counter">${accountInfo.equity.toFixed(2)}</p>
+                        </div>
+                        <div className="bg-green-500 p-3 rounded-full">
+                            <i className="fas fa-chart-line text-white"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="metric-card card-hover rounded-2xl p-6 text-white smooth-enter">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-300 text-sm">Free Margin</p>
+                            <p className="text-2xl font-bold number-counter">${accountInfo.freeMargin.toFixed(2)}</p>
+                        </div>
+                        <div className="bg-purple-500 p-3 rounded-full">
+                            <i className="fas fa-coins text-white"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="metric-card card-hover rounded-2xl p-6 text-white smooth-enter">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-300 text-sm">Profit</p>
+                            <p className={`text-2xl font-bold number-counter ${accountInfo.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                ${accountInfo.profit.toFixed(2)}
+                            </p>
+                        </div>
+                        <div className={`p-3 rounded-full ${accountInfo.profit >= 0 ? 'bg-green-500' : 'bg-red-500'}`}>
+                            <i className={`fas ${accountInfo.profit >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'} text-white`}></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Weekly Performance Component
+        const WeeklyPerformance = ({ weeklyPerformance }) => (
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 card-hover smooth-enter">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                        <i className="fas fa-calendar-week mr-3 text-orange-600"></i>
+                        Weekly R:R Performance
+                    </h2>
+                    <div className="text-sm text-gray-600">
+                        <i className="fas fa-info-circle mr-1"></i>
+                        10% threshold for 1:2 upgrade
+                    </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {Object.entries(weeklyPerformance).map(([symbol, data]) => (
+                        <div key={symbol} className={`p-4 rounded-xl border-2 transition-all ${
+                            data.upgraded ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+                        }`}>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="font-bold text-gray-900">{symbol}</span>
+                                {data.upgraded && (
+                                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                        ⚡ 1:2 R:R
+                                    </span>
+                                )}
+                            </div>
+                            <div className="text-2xl font-bold text-gray-900 mb-1">
+                                {data.pct.toFixed(1)}%
+                            </div>
+                            <div className="text-sm text-gray-600">
+                                {data.trades} trades this week
+                            </div>
+                            <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                    className={`h-2 rounded-full ${data.pct >= 10 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                                    style={{ width: `${Math.min(data.pct, 20) * 5}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // Enhanced Active Trades Component
+        const ActiveTrades = ({ trades }) => (
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 card-hover smooth-enter">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                        <i className="fas fa-chart-line mr-3 text-blue-600"></i>
+                        Active Trades
+                    </h2>
+                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {trades.length} Open
+                    </span>
+                </div>
+                
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-gray-200">
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Symbol</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Type</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Volume</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Timeframe</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">R:R Strategy</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Current P&L</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Weekly %</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {trades.map((trade) => (
+                                <tr key={trade.id} className="trade-row border-b border-gray-50">
+                                    <td className="py-4 px-4 font-medium text-gray-900">{trade.symbol}</td>
+                                    <td className="py-4 px-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            trade.type === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        }`}>
+                                            {trade.type}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-4 text-gray-700">{trade.volume}</td>
+                                    <td className="py-4 px-4">
+                                        <span className={`timeframe-badge ${
+                                            trade.timeframe === 'H1/M15' ? 'timeframe-h1-m15' : 'timeframe-m15-m5'
+                                        }`}>
+                                            {trade.timeframe}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            trade.rrStrategy === '1:2' ? 'rr-strategy-1-2' : 'rr-strategy-1-1'
+                                        }`}>
+                                            {trade.rrStrategy}
+                                        </span>
+                                        {trade.breakEven && (
+                                            <div className="break-even-indicator mt-1">
+                                                BE: {trade.breakEven}
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="py-4 px-4">
+                                        <span className={`font-medium number-counter ${
+                                            trade.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                                        }`}>
+                                            ${trade.profit.toFixed(2)}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                        <span className={`font-medium ${
+                                            trade.weeklyPnl >= 10 ? 'text-green-600' : 'text-yellow-600'
+                                        }`}>
+                                            {trade.weeklyPnl.toFixed(1)}%
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-4">
+                                        <button className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors mr-2">
+                                            Close
+                                        </button>
+                                        <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                                            Update
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+
+        // Enhanced Signals Component
+        const SignalsList = ({ signals }) => (
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 card-hover smooth-enter">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                        <i className="fas fa-signal mr-3 text-green-600"></i>
+                        Trading Signals
+                    </h2>
+                    <div className="flex items-center space-x-2">
+                        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            <i className="fas fa-plus mr-2"></i>
+                            New Signal
+                        </button>
+                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            <i className="fas fa-sync mr-2"></i>
+                            Sync PURE EA
+                        </button>
+                    </div>
+                </div>
+                
+                <div className="space-y-4">
+                    {signals.map((signal) => (
+                        <div key={signal.id} className="signal-item p-4 border border-gray-200 rounded-xl">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="font-bold text-gray-900">{signal.symbol}</span>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            signal.direction === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        }`}>
+                                            {signal.direction}
+                                        </span>
+                                        <span className={`timeframe-badge ${
+                                            signal.timeframe === 'H1/M15' ? 'timeframe-h1-m15' : 'timeframe-m15-m5'
+                                        }`}>
+                                            {signal.timeframe}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                        <span className="text-sm text-gray-600">Strength:</span>
+                                        <span className="font-medium text-blue-600">{(signal.strength * 100).toFixed(0)}%</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        signal.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        signal.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                        'bg-gray-100 text-gray-800'
+                                    }`}>
+                                        {signal.status}
+                                    </span>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        signal.rrStrategy === '1:2' ? 'rr-strategy-1-2' : 'rr-strategy-1-1'
+                                    }`}>
+                                        {signal.rrStrategy} R:R
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                                <div className="text-sm text-gray-600">
+                                    <div className="flex justify-between">
+                                        <span>Entry:</span>
+                                        <span className="font-medium">{signal.entry}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Stop Loss:</span>
+                                        <span className="font-medium">{signal.sl}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Take Profit:</span>
+                                        <span className="font-medium">{signal.tp}</span>
+                                    </div>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    <div className="flex justify-between">
+                                        <span>Weekly Performance:</span>
+                                        <span className={`font-medium ${signal.weeklyPerformance >= 10 ? 'text-green-600' : 'text-yellow-600'}`}>
+                                            {signal.weeklyPerformance.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                    {signal.llmAnalysis.breakEvenPrice && (
+                                        <div className="flex justify-between">
+                                            <span>Break Even:</span>
+                                            <span className="font-medium text-blue-600">{signal.llmAnalysis.breakEvenPrice}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                        <span>Confidence:</span>
+                                        <span className="font-medium">{(signal.llmAnalysis.confidence * 100).toFixed(0)}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                                <div className="text-sm text-gray-700">
+                                    <div className="flex items-center mb-1">
+                                        <i className="fas fa-robot mr-2 text-blue-600"></i>
+                                        <span className="font-medium">LLM Analysis:</span>
+                                    </div>
+                                    <p className="text-gray-600">{signal.llmAnalysis.reasoning}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-500">{signal.timestamp}</span>
+                                <div className="flex items-center space-x-2">
+                                    {signal.status === 'pending' && (
+                                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                                            <i className="fas fa-check mr-1"></i>
+                                            Approve
+                                        </button>
+                                    )}
+                                    {signal.status === 'approved' && (
+                                        <button className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                                            <i className="fas fa-play mr-1"></i>
+                                            Execute
+                                        </button>
+                                    )}
+                                    <button className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                                        <i className="fas fa-cog mr-1"></i>
+                                        Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // Enhanced Quick Actions Component
+        const QuickActions = () => (
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 card-hover smooth-enter">
+                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i className="fas fa-bolt mr-3 text-yellow-600"></i>
+                    Quick Actions
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl text-center transition-colors group">
+                        <i className="fas fa-plus text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <p className="font-medium">Execute Signal</p>
+                        <p className="text-sm opacity-80">Send to MT5</p>
+                    </button>
+                    
+                    <button className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl text-center transition-colors group">
+                        <i className="fas fa-sync-alt text-2xl mb-2 group-hover:rotate-180 transition-transform"></i>
+                        <p className="font-medium">Sync PURE EA</p>
+                        <p className="text-sm opacity-80">Update Timeframes</p>
+                    </button>
+                    
+                    <button className="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-xl text-center transition-colors group">
+                        <i className="fas fa-robot text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <p className="font-medium">LLM Analysis</p>
+                        <p className="text-sm opacity-80">Run GPT-4</p>
+                    </button>
+                    
+                    <button className="bg-orange-600 hover:bg-orange-700 text-white p-4 rounded-xl text-center transition-colors group">
+                        <i className="fas fa-calendar-week text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <p className="font-medium">R:R Strategy</p>
+                        <p className="text-sm opacity-80">Weekly Review</p>
+                    </button>
+                    
+                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-xl text-center transition-colors group">
+                        <i className="fas fa-brain text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <p className="font-medium">MCP Decision</p>
+                        <p className="text-sm opacity-80">Kafka + Hansei</p>
+                    </button>
+                    
+                    <button className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-xl text-center transition-colors group">
+                        <i className="fas fa-times-circle text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <p className="font-medium">Emergency Stop</p>
+                        <p className="text-sm opacity-80">Close All</p>
+                    </button>
+                </div>
+            </div>
+        );
+
+        // Enhanced System Status Component
+        const SystemStatus = ({ systemStatus }) => (
+            <div className="bg-white rounded-2xl shadow-xl p-6 card-hover smooth-enter">
+                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i className="fas fa-server mr-3 text-gray-600"></i>
+                    System Status
+                </h2>
+                
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${systemStatus.django ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="font-medium text-gray-900">Django API</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            systemStatus.django ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {systemStatus.django ? 'Online' : 'Offline'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${systemStatus.mt5 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="font-medium text-gray-900">MetaTrader 5</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            systemStatus.mt5 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {systemStatus.mt5 ? 'Connected' : 'Disconnected'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${systemStatus.mcp ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="font-medium text-gray-900">MCP Server</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            systemStatus.mcp ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {systemStatus.mcp ? 'Running' : 'Stopped'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${systemStatus.llm ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="font-medium text-gray-900">LLM (GPT-4)</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            systemStatus.llm ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {systemStatus.llm ? 'Ready' : 'Error'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${systemStatus.pure_ea ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="font-medium text-gray-900">PURE EA</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            systemStatus.pure_ea ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {systemStatus.pure_ea ? 'Active' : 'Inactive'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${systemStatus.timeframe_sync ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <span className="font-medium text-gray-900">Timeframe Sync</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            systemStatus.timeframe_sync ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {systemStatus.timeframe_sync ? 'Synced' : 'Out of sync'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Footer Component
+        const Footer = () => (
+            <footer className="bg-white border-t border-gray-200 mt-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="flex items-center space-x-3">
+                            <div className="robot-icon">
+                                <i className="fas fa-robot"></i>
+                            </div>
+                            <div>
+                                <div className="text-lg font-bold text-gray-900">MikroBot</div>
+                                <div className="text-sm text-gray-600">Smart Microscale Trading</div>
+                            </div>
+                        </div>
+                        
+                        <div className="text-center">
+                            <h4 className="font-semibold text-gray-900 mb-2">Documentation</h4>
+                            <p className="text-sm text-gray-600">Version 2.0 - Dynamic R:R Strategy</p>
+                            <p className="text-sm text-gray-600">Updated: {new Date().toLocaleDateString('fi-FI')}</p>
+                        </div>
+                        
+                        <div className="fox-branding">
+                            <div>Powered by <a href="https://www.foxinthecode.fi" target="_blank">Fox-In-The-Code</a></div>
+                            <div>Support: <a href="mailto:markus@foxinthecode.fi">markus@foxinthecode.fi</a></div>
+                            <div className="text-xs text-gray-500 mt-2">© 2025 Fox-In-The-Code. All rights reserved.</div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        );
+
+        // Main App Component
+        const MikroBotApp = () => {
+            const [systemStatus, setSystemStatus] = useState(mockData.systemStatus);
+            const [loading, setLoading] = useState(false);
+            const [data, setData] = useState(mockData);
+            const [apiConnected, setApiConnected] = useState(false);
+
+            const handleRefresh = useCallback(async () => {
+                setLoading(true);
+                try {
+                    // Try to connect to real API
+                    const accountInfo = await apiCall('/api/trades/mt5_account_info/');
+                    const signals = await apiCall('/api/signals/');
+                    const trades = await apiCall('/api/trades/active_trades/');
+                    
+                    setData(prevData => ({
+                        ...prevData,
+                        accountInfo,
+                        signals,
+                        trades
+                    }));
+                    setApiConnected(true);
+                } catch (error) {
+                    console.warn('API not available, using mock data');
+                    // Simulate status updates with mock data
+                    setSystemStatus({
+                        django: true,
+                        mt5: Math.random() > 0.3,
+                        mcp: Math.random() > 0.5,
+                        llm: Math.random() > 0.2,
+                        pure_ea: Math.random() > 0.4,
+                        timeframe_sync: Math.random() > 0.3
+                    });
+                    setApiConnected(false);
+                }
+                setLoading(false);
+            }, []);
+
+            useEffect(() => {
+                // Try initial connection
+                handleRefresh();
+                
+                // Simulate real-time updates
+                const interval = setInterval(() => {
+                    setData(prevData => ({
+                        ...prevData,
+                        accountInfo: {
+                            ...prevData.accountInfo,
+                            profit: prevData.accountInfo.profit + (Math.random() - 0.5) * 10
+                        }
+                    }));
+                }, 5000);
+
+                return () => clearInterval(interval);
+            }, [handleRefresh]);
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <Header 
+                        systemStatus={systemStatus} 
+                        notifications={data.notifications}
+                        onRefresh={handleRefresh}
+                    />
+                    
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        {!apiConnected && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <div className="flex items-center">
+                                    <i className="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                                    <span className="text-yellow-800">Demo Mode - Start Django server to connect to real data</span>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <ProcessFlow processFlow={data.processFlow} />
+                        <AccountSummary accountInfo={data.accountInfo} />
+                        <WeeklyPerformance weeklyPerformance={data.accountInfo.weeklyPerformance} />
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2">
+                                <ActiveTrades trades={data.trades} />
+                                <SignalsList signals={data.signals} />
+                                <QuickActions />
+                            </div>
+                            
+                            <div className="lg:col-span-1">
+                                <SystemStatus systemStatus={systemStatus} />
+                            </div>
+                        </div>
+                    </main>
+                    
+                    <Footer />
+                    
+                    {loading && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-2xl p-8 flex items-center space-x-4">
+                                <div className="loading-spinner"></div>
+                                <span className="text-gray-700 font-medium">Refreshing data...</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<MikroBotApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

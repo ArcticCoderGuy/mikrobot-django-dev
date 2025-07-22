@@ -20,6 +20,12 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('dashboard/', include('dashboard.urls')),
+    path('api/', include('signals.urls')),  # API-polku lisätty
+    path('api/', include('trading.urls')),  # Trading API
+    path('', include('signals.urls')),
+    path('', include('trading.urls')),
+    path('api-auth/', include('rest_framework.urls')),
 ]
 
 # Admin customization

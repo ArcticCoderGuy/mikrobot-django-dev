@@ -1,0 +1,75 @@
+═══════════════════════════════════════════════════════════════
+    MIKROBOT QA DASHBOARD - PIKAOHJE
+    Kehittäjä: Markus Kaprio / Fox-In-The-Code
+═══════════════════════════════════════════════════════════════
+
+📌 KÄYNNISTYS:
+--------------
+1. Avaa selaimessa:
+   file:///C:/Users/HP/Desktop/Claude%20projects/mikrobot_django_dev/mikrobot_qa_dashboard.html
+
+2. Seuraa testejä ylhäältä alas (järjestys tärkeä!)
+
+
+📌 VALMISTELUT ENNEN TESTEJÄ:
+-----------------------------
+□ Django palvelin käynnissä:
+  cd mikrobot_django_dev
+  python manage.py runserver
+
+□ MCP palvelin käynnissä:
+  cd mikrobot-mcp-dev
+  python main.py
+
+□ .env tiedosto luotu:
+  MT5_LOGIN=123456
+  MT5_PASSWORD=salasana
+  MT5_SERVER=broker-server
+
+
+📌 TESTIN SUORITUS:
+-------------------
+1. KLIKKAA testin nimeä
+2. LUE ohjeet
+3. KOPIOI komennot
+4. SUORITA komennot
+5. MERKITSE Pass ✅ tai Fail ❌
+
+
+📌 NAPIT:
+---------
+[✓ Toimii]     = Testi onnistui
+[✗ Ei toimi]   = Testi epäonnistui
+[Vie Tulokset] = Tallenna JSON
+[Luo Raportti] = Generoi MD-raportti
+[Nollaa]       = Aloita alusta
+
+
+📌 TESTIJÄRJESTYS:
+------------------
+1. Ympäristön valmistelu (3 testiä)
+2. MT5 Yhteys (2 testiä)  
+3. Signaalin käsittely (2 testiä)
+4. Kaupan suoritus (3 testiä)
+5. API testit (3 testiä)
+6. End-to-End (1 testi)
+
+
+📌 MUISTA:
+----------
+• Testaa JÄRJESTYKSESSÄ
+• Älä ohita testejä
+• Lue debug-konsolia virhetilanteissa
+• Generoi raportti lopuksi
+
+
+📌 VIANMÄÄRITYS:
+----------------
+MT5 ei yhdisty?      → Tarkista .env tunnukset
+Django ei käynnisty? → Aktivoi venv, asenna paketit
+API ei vastaa?       → Tarkista autentikointi
+
+
+═══════════════════════════════════════════════════════════════
+Kun kaikki testit ✅ → MikroBot valmis tuotantoon! 🚀
+═══════════════════════════════════════════════════════════════

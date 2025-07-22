@@ -1,0 +1,125 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | MikroBot Admin{% endblock %}
+
+{% block branding %}
+<div class="mikrobot-admin-header" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: white; border-bottom: 1px solid #e5e7eb;">
+    <div style="display: flex; align-items: center;">
+        <img src="{% static 'images/Mikrobot.jpg' %}" alt="MikroBot" style="width: 40px; height: 40px; margin-right: 15px;">
+        <div>
+            <h1 style="color: #1f2937; font-size: 24px; margin: 0; font-weight: bold;">MikroBot</h1>
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">Trading Platform Admin</p>
+        </div>
+    </div>
+    <nav style="display: flex; gap: 20px; align-items: center;">
+        <a href="/dashboard/" style="color: #3b82f6; text-decoration: none; font-weight: 500; padding: 8px 16px; background: #eff6ff; border-radius: 6px;">📊 Dashboard</a>
+        <a href="/admin/signals/mql5signal/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">📨 Signals</a>
+        <a href="/admin/trading/trade/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">💹 Trades</a>
+        <a href="/admin/core/usersettings/" style="color: #3b82f6; text-decoration: none; font-weight: 500;">⚙️ Settings</a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* MikroBot Admin Theme */
+    :root {
+        --primary: #3b82f6;
+        --primary-fg: #ffffff;
+        --body-fg: #374151;
+        --body-bg: #f9fafb;
+        --body-quiet-color: #6b7280;
+        --body-loud-color: #1f2937;
+        --header-color: #ffffff;
+        --header-branding-color: #1f2937;
+        --header-bg: #ffffff;
+        --header-link-color: #3b82f6;
+        --breadcrumbs-fg: #6b7280;
+        --breadcrumbs-bg: #ffffff;
+        --breadcrumbs-link-fg: #3b82f6;
+        --link-fg: #3b82f6;
+        --link-hover-color: #2563eb;
+        --link-selected-fg: #2563eb;
+        --hairline-color: #e5e7eb;
+        --border-color: #d1d5db;
+        --error-fg: #dc2626;
+        --message-success-bg: #d1fae5;
+        --message-warning-bg: #fef3c7;
+        --message-error-bg: #fee2e2;
+        --darkened-bg: #f3f4f6;
+        --selected-bg: #dbeafe;
+        --selected-row: #f0f9ff;
+        --button-fg: #ffffff;
+        --button-bg: #3b82f6;
+        --button-hover-bg: #2563eb;
+        --default-button-bg: #6b7280;
+        --default-button-hover-bg: #4b5563;
+        --close-button-bg: #6b7280;
+        --close-button-hover-bg: #4b5563;
+        --delete-button-bg: #dc2626;
+        --delete-button-hover-bg: #b91c1c;
+    }
+    
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+        color: white;
+    }
+    
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--button-bg);
+        color: var(--button-fg);
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+    }
+    
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+        background: var(--button-hover-bg);
+    }
+    
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: var(--primary);
+    }
+    
+    .button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+        background: var(--link-hover-color);
+    }
+    
+    #header {
+        background: var(--header-bg);
+        border-bottom: 1px solid var(--hairline-color);
+    }
+    
+    .breadcrumbs {
+        background: var(--breadcrumbs-bg);
+        border-bottom: 1px solid var(--hairline-color);
+    }
+    
+    #changelist-search input[type="text"] {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+    }
+    
+    .results {
+        border: 1px solid var(--hairline-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .results th {
+        background: #f8f9fa;
+        border-bottom: 1px solid var(--hairline-color);
+    }
+    
+    .form-row {
+        border-bottom: 1px solid #f3f4f6;
+        padding: 12px 0;
+    }
+    
+    .mikrobot-admin-header {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

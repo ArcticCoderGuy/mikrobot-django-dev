@@ -1,0 +1,88 @@
+{
+  "timestamp": "2025-07-22T15:14:15.497033",
+  "tests": {
+    "django_server": {
+      "status": "PASS",
+      "details": "HTTP 200",
+      "response_time": 2.097796
+    },
+    "main_dashboard": {
+      "status": "PASS",
+      "details": {
+        "/dashboard/": {
+          "status": "PASS",
+          "status_code": 200,
+          "response_time": 2.08276
+        },
+        "/dashboard/main/": {
+          "status": "PASS",
+          "status_code": 200,
+          "response_time": 2.080709
+        },
+        "/dashboard/settings/": {
+          "status": "PASS",
+          "status_code": 200,
+          "response_time": 2.054193
+        },
+        "/dashboard/qa/": {
+          "status": "PASS",
+          "status_code": 200,
+          "response_time": 2.02665
+        }
+      },
+      "pages_tested": 4
+    },
+    "mt5_connection": {
+      "status": "PASS",
+      "details": "Balance: 10000.0",
+      "connection": true
+    },
+    "database": {
+      "status": "PASS",
+      "details": {
+        "signals": 5,
+        "trades": 1,
+        "connection": true
+      }
+    },
+    "settings": {
+      "status": "PASS",
+      "details": "Settings page HTTP 200"
+    },
+    "rest_api": {
+      "status": "PASS",
+      "details": {
+        "/api/v1/signals/": {
+          "status": "PASS",
+          "status_code": 401
+        },
+        "/api/v1/trades/": {
+          "status": "PASS",
+          "status_code": 401
+        },
+        "/api/v1/signals/stats/": {
+          "status": "PASS",
+          "status_code": 401
+        },
+        "/api/v1/trades/statistics/": {
+          "status": "PASS",
+          "status_code": 401
+        }
+      },
+      "pass_rate": "4/4"
+    },
+    "end_to_end": {
+      "status": "PASS",
+      "details": "Execute signal endpoint responsive (Auth required)",
+      "signal_available": true
+    }
+  },
+  "summary": {
+    "total_tests": 7,
+    "passed": 7,
+    "failed": 0,
+    "warnings": 0,
+    "pass_rate": 100.0
+  },
+  "overall_status": "PASS"
+}
