@@ -148,11 +148,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
 }
 
-# CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React dev server
-    "http://127.0.0.1:3000",
-]
+# CORS settings - Development mode (allows all origins)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Production CORS settings (commented out for development)
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",  # React dev server
+#     "http://127.0.0.1:3000",
+# ]
 
 # Debug toolbar settings (poistettu väliaikaisesti)
 # INTERNAL_IPS = [

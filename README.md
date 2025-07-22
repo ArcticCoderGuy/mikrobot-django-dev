@@ -425,3 +425,5 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 [⭐ Star this repo](https://github.com/yourusername/mikrobot-mcp) | [🐛 Report Bug](https://github.com/yourusername/mikrobot-mcp/issues) | [💡 Request Feature](https://github.com/yourusername/mikrobot-mcp/issues)
 
 </div>
+
+TESTI !
