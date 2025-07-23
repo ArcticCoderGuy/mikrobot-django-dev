@@ -39,3 +39,15 @@ flake8==7.0.0
 # Production dependencies
 gunicorn==21.2.0
 whitenoise==6.6.0
+
+# System monitoring
+psutil==5.9.8
+
+# Trading platform integration  
+MetaTrader5==5.0.5120
+
+# Authentication and security
+PyJWT==2.8.0
+
+# OpenAI integration
+openai==1.12.0
