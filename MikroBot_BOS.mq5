@@ -15,8 +15,8 @@ input double   InpPipTrigger = 0.6;           // Pip trigger for 3rd candle
 input int      InpLookbackBars = 20;          // H1 bars to look back for structure
 
 input group "=== DJANGO MCP ==="
-input string   InpDjangoURL = "http://localhost:8000/api/v1/pure-signal/";
-input string   InpTimeframeURL = "http://localhost:8000/api/v1/pure-signal/timeframes/";
+input string   InpDjangoURL = "http://127.0.0.1:8000/api/v1/pure-signal/";
+input string   InpTimeframeURL = "http://127.0.0.1:8000/api/v1/pure-signal/timeframes/";
 input int      InpTimeoutMS = 5000;           // HTTP timeout milliseconds
 input bool     InpSendToDjango = true;        // Send signals to Django MCP
 input bool     InpAutoTimeframes = true;     // Auto-fetch timeframes from Django
