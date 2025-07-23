@@ -1,0 +1,632 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "FoxBox Framework™ U-Cell API",
+    "version": "1.0.0",
+    "description": "Production-ready U-Cell integration API for MikroBot Django system",
+    "contact": {
+      "name": "FoxBox Framework",
+      "url": "https://github.com/mikrobot-django"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.mikrobot.production",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/v1/u-cell/validations/": {
+      "get": {
+        "tags": ["U-Cell 1: Signal Detection"],
+        "operationId": "listSignalValidations",
+        "summary": "List all signal validations",
+        "description": "Retrieve all U-Cell signal validation records",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UCellSignalValidation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["U-Cell 1: Signal Detection"],
+        "operationId": "createSignalValidation",
+        "summary": "Create new signal validation",
+        "description": "Create a new U-Cell signal validation record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UCellSignalValidation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Validation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UCellSignalValidation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/validations/validate_signal/": {
+      "post": {
+        "tags": ["U-Cell 1: Signal Detection"],
+        "operationId": "validateSignal",
+        "summary": "Validate signal using U-Cell formatter",
+        "description": "Process and validate a trading signal using U-Cell signal formatter",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signal_id": {
+                    "type": "integer", 
+                    "description": "MQL5 Signal ID to validate"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signal validation completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "validation_result": {"type": "object"},
+                    "bos_detection": {"type": "object"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/risk-assessments/": {
+      "get": {
+        "tags": ["U-Cell 3: Processing & Analysis"],
+        "operationId": "listRiskAssessments",
+        "summary": "List all risk assessments",
+        "description": "Retrieve all U-Cell risk assessment records",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UCellRiskAssessment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["U-Cell 3: Processing & Analysis"],
+        "operationId": "createRiskAssessment",
+        "summary": "Create new risk assessment",
+        "description": "Create a new U-Cell risk assessment record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UCellRiskAssessment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Risk assessment created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/risk-assessments/assess_risk/": {
+      "post": {
+        "tags": ["U-Cell 3: Processing & Analysis"],
+        "operationId": "assessRisk",
+        "summary": "Assess risk using U-Cell calculator",
+        "description": "Calculate risk metrics for a trading signal using U-Cell risk calculator",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "signal_id": {
+                    "type": "integer",
+                    "description": "MQL5 Signal ID to assess"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risk assessment completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "risk_score": {"type": "number"},
+                    "risk_metrics": {"type": "object"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/executions/": {
+      "get": {
+        "tags": ["U-Cell 4: Execution"],
+        "operationId": "listExecutions",
+        "summary": "List all execution records",
+        "description": "Retrieve all U-Cell execution records",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UCellExecution"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["U-Cell 4: Execution"],
+        "operationId": "createExecution",
+        "summary": "Create new execution record",
+        "description": "Create a new U-Cell execution record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UCellExecution"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Execution record created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/quality-measurements/": {
+      "get": {
+        "tags": ["U-Cell 5: Monitoring & Control"],
+        "operationId": "listQualityMeasurements",
+        "summary": "List all quality measurements",
+        "description": "Retrieve all U-Cell quality measurement records",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UCellQualityMeasurement"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["U-Cell 5: Monitoring & Control"],
+        "operationId": "createQualityMeasurement",
+        "summary": "Create new quality measurement",
+        "description": "Create a new U-Cell quality measurement record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UCellQualityMeasurement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Quality measurement created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/quality-measurements/record_measurement/": {
+      "post": {
+        "tags": ["U-Cell 5: Monitoring & Control"],
+        "operationId": "recordMeasurement",
+        "summary": "Record quality measurement",
+        "description": "Record a new quality measurement using statistical monitor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "process_name": {
+                    "type": "string",
+                    "description": "Name of the process being measured"
+                  },
+                  "measurement_value": {
+                    "type": "number",
+                    "description": "Measured value"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Measurement recorded successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/system-health/": {
+      "get": {
+        "tags": ["U-Cell 5: Monitoring & Control"],
+        "operationId": "listSystemHealth",
+        "summary": "List all system health records",
+        "description": "Retrieve all U-Cell system health records",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UCellSystemHealth"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["U-Cell 5: Monitoring & Control"],
+        "operationId": "createSystemHealth",
+        "summary": "Create new system health record",
+        "description": "Create a new U-Cell system health record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UCellSystemHealth"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "System health record created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/u-cell/system-health/current_status/": {
+      "get": {
+        "tags": ["U-Cell 5: Monitoring & Control"],
+        "operationId": "getCurrentStatus",
+        "summary": "Get current system health status",
+        "description": "Retrieve the current system health status and metrics",
+        "responses": {
+          "200": {
+            "description": "Current system status retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string"},
+                    "overall_health": {"type": "string"},
+                    "sigma_level": {"type": "number"},
+                    "throughput_rate": {"type": "number"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UCellSignalValidation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "signal": {
+            "type": "integer",
+            "description": "Reference to MQL5Signal"
+          },
+          "validation_result": {
+            "type": "object",
+            "description": "JSON validation result"
+          },
+          "bos_detection": {
+            "type": "object",
+            "description": "Break of Structure detection data"
+          },
+          "confidence_score": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "validated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "validation_status": {
+            "type": "string",
+            "enum": ["pending", "validated", "rejected", "requires_review"],
+            "default": "pending"
+          }
+        },
+        "required": ["signal"]
+      },
+      "UCellRiskAssessment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "signal": {
+            "type": "integer",
+            "description": "Reference to MQL5Signal"
+          },
+          "risk_score": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "risk_metrics": {
+            "type": "object",
+            "description": "JSON risk calculation data"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "default": "medium"
+          },
+          "assessed_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "max_position_size": {
+            "type": "number",
+            "format": "float"
+          },
+          "recommended_sl": {
+            "type": "number",
+            "format": "float"
+          },
+          "recommended_tp": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "required": ["signal", "risk_score"]
+      },
+      "UCellExecution": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "signal": {
+            "type": "integer",
+            "description": "Reference to MQL5Signal"
+          },
+          "execution_result": {
+            "type": "object",
+            "description": "JSON execution result data"
+          },
+          "executed_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "execution_status": {
+            "type": "string",
+            "enum": ["pending", "executed", "failed", "cancelled"],
+            "default": "pending"
+          },
+          "mt5_ticket": {
+            "type": "integer",
+            "description": "MT5 order ticket number"
+          },
+          "actual_entry_price": {
+            "type": "number",
+            "format": "float"
+          },
+          "actual_volume": {
+            "type": "number",
+            "format": "float"
+          },
+          "execution_latency_ms": {
+            "type": "integer",
+            "description": "Execution latency in milliseconds"
+          }
+        },
+        "required": ["signal"]
+      },
+      "UCellQualityMeasurement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "process_name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "measurement_value": {
+            "type": "number",
+            "format": "float"
+          },
+          "control_limits": {
+            "type": "object",
+            "description": "JSON control limits data"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "within_spec": {
+            "type": "boolean",
+            "default": true
+          },
+          "sigma_level": {
+            "type": "number",
+            "format": "float"
+          },
+          "correlation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["process_name", "measurement_value"]
+      },
+      "UCellSystemHealth": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "overall_status": {
+            "type": "string",
+            "enum": ["healthy", "warning", "critical", "maintenance"],
+            "default": "healthy"
+          },
+          "health_metrics": {
+            "type": "object",
+            "description": "JSON system health metrics"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true  
+          },
+          "sigma_level": {
+            "type": "number",
+            "format": "float"
+          },
+          "throughput_rate": {
+            "type": "number",
+            "format": "float"
+          },
+          "error_rate": {
+            "type": "number",
+            "format": "float"
+          },
+          "response_time_ms": {
+            "type": "integer",
+            "description": "Average response time in milliseconds"
+          }
+        },
+        "required": ["overall_status"]
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "U-Cell 1: Signal Detection",
+      "description": "Signal validation and BOS detection endpoints"
+    },
+    {
+      "name": "U-Cell 3: Processing & Analysis", 
+      "description": "Risk assessment and signal analysis endpoints"
+    },
+    {
+      "name": "U-Cell 4: Execution",
+      "description": "Trade execution and order management endpoints"
+    },
+    {
+      "name": "U-Cell 5: Monitoring & Control",
+      "description": "Quality measurements and system health monitoring endpoints"
+    }
+  ]
+}

@@ -11,7 +11,8 @@ API endpoints for U-Cell component integration
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from core.authentication import DoddApiKeyAuthentication
 from django.http import JsonResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -217,18 +218,51 @@ class UCellRiskAssessmentViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_503_SERVICE_UNAVAILABLE
                 )
             
-            # Risk configuration
+            # Get real account info from MT5
+            from trading.mt5_executor import MT5Executor
+            
+            account_balance = 10000.0  # Default fallback
+            account_currency = 'USD'    # Default fallback
+            
+            try:
+                with MT5Executor() as executor:
+                    account_info = executor.get_account_info()
+                    if account_info:
+                        account_balance = account_info['balance']
+                        account_currency = account_info['currency']
+                        logger.info(f"MT5 account loaded: {account_currency} {account_balance}")
+                    else:
+                        logger.warning("Could not get MT5 account info, using defaults")
+            except Exception as e:
+                logger.error(f"MT5 connection error: {e}, using default values")
+            
+            # Risk configuration with dynamic values
             risk_config = {
                 'max_risk_per_trade': 0.01,  # 1%
                 'max_daily_risk': 0.02,      # 2%
                 'max_weekly_risk': 0.05,     # 5%
                 'max_drawdown': 0.10,        # 10%
-                'account_balance': 10000.0,   # Default
-                'account_currency': 'USD'
+                'account_balance': account_balance,   # Dynamic from MT5
+                'account_currency': account_currency  # Dynamic from MT5
             }
             
             # Initialize calculator
             calculator = RiskCalculator(risk_config)
+            
+            # Get dynamic pip value for the symbol
+            from trading.pip_value_calculator import PipValueCalculator
+            pip_calculator = PipValueCalculator()
+            pip_value = pip_calculator.calculate_pip_value(
+                mql5_signal.symbol, 
+                1.0,  # Standard lot
+                account_currency
+            )
+            
+            # Log pip value calculation
+            if pip_value:
+                logger.info(f"Pip value for {mql5_signal.symbol}: {pip_value} {account_currency}")
+            else:
+                logger.warning(f"Could not calculate pip value for {mql5_signal.symbol}, using default")
             
             # Convert Django signal to risk format
             risk_signal = {
@@ -238,7 +272,8 @@ class UCellRiskAssessmentViewSet(viewsets.ModelViewSet):
                 'entry_price': float(mql5_signal.entry_price),
                 'stop_loss': float(mql5_signal.stop_loss),
                 'take_profit': float(mql5_signal.take_profit),
-                'confidence': 0.85  # Default
+                'confidence': 0.85,  # Default
+                'pip_value': pip_value  # Dynamic pip value
             }
             
             # Calculate risk
