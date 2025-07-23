@@ -10,7 +10,8 @@ from .u_cell_views import (
     UCellRiskAssessmentViewSet,
     UCellExecutionViewSet,
     UCellQualityMeasurementViewSet,
-    UCellSystemHealthViewSet
+    UCellSystemHealthViewSet,
+    UCellStatisticalMonitoringViewSet
 )
 
 # Create router for U-Cell ViewSets
@@ -22,6 +23,7 @@ router.register(r'risk-assessments', UCellRiskAssessmentViewSet, basename='ucell
 router.register(r'executions', UCellExecutionViewSet, basename='ucell-execution')
 router.register(r'quality-measurements', UCellQualityMeasurementViewSet, basename='ucell-quality')
 router.register(r'system-health', UCellSystemHealthViewSet, basename='ucell-health')
+router.register(r'statistical-monitoring', UCellStatisticalMonitoringViewSet, basename='ucell-monitoring')
 
 # U-Cell specific URL patterns
 urlpatterns = [

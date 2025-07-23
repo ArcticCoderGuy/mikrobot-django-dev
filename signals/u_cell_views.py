@@ -11,7 +11,7 @@ API endpoints for U-Cell component integration
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from core.authentication import DoddApiKeyAuthentication
 from django.http import JsonResponse
 from django.utils import timezone
@@ -39,8 +39,13 @@ from .u_cell_serializers import (
 import sys
 import os
 
-# Import U-Cell components
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'mikrobot_u_cells', 'build'))
+# Import U-Cell components - Fixed paths to validated components
+base_path = os.path.join(os.path.dirname(__file__), '..', '..', 'mikrobot_u_cells', 'validated')
+sys.path.append(os.path.join(base_path, 'UCell_Signal_Detection_v1.0'))
+sys.path.append(os.path.join(base_path, 'UCell_Processing_Analysis_v1.0'))
+sys.path.append(os.path.join(base_path, 'UCell_Execution_v1.0'))
+sys.path.append(os.path.join(base_path, 'UCell_Signal_Reception_v1.0'))
+sys.path.append(os.path.join(base_path, 'UCell_Monitoring_Control_v1.0'))
 
 try:
     from signal_formatter import SignalFormatter, BOSDetectionResult
@@ -499,5 +504,334 @@ class UCellSystemHealthViewSet(viewsets.ModelViewSet):
             logger.error(f"System health check failed: {str(e)}")
             return Response(
                 {'error': f'Health check failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class UCellStatisticalMonitoringViewSet(viewsets.ViewSet):
+    """
+    U-Cell 5: Statistical Process Control - Six Sigma Monitoring API
+    
+    ABOVE ROBUST™ Statistical monitoring with Cp/Cpk ≥ 3.0 measurement
+    """
+    
+    permission_classes = [AllowAny]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        # HARDCODED PRODUCTION_CONFIG - Above Robust™ approach
+        self.PRODUCTION_CONFIG = {
+            'execute_threshold': 0.8,
+            'review_threshold': 0.6,
+            'max_risk_per_trade': 0.01,
+            'target_processing_time_ms': 150.0,
+            'usl_processing_time_ms': 200.0,
+            'acceptable_sessions': ['London', 'London-NY'],
+            'min_position_size': 0.01,
+            'max_position_size': 1.0,
+            'six_sigma_target': 6.0,
+            'cpk_minimum': 2.0,
+            'dpmo_maximum': 3.4
+        }
+        
+        # Initialize statistical monitor
+        if StatisticalMonitor:
+            self.statistical_monitor = StatisticalMonitor(self.PRODUCTION_CONFIG)
+        else:
+            self.statistical_monitor = None
+            logger.warning("StatisticalMonitor not available")
+    
+    @action(detail=False, methods=['post'])
+    def record_measurement(self, request):
+        """
+        Record a quality measurement for Six Sigma analysis
+        
+        Expected payload:
+        {
+            "process_name": "signal_processing_latency",
+            "measurement_value": 23.5,
+            "measurement_unit": "ms",
+            "target_value": 25.0,
+            "upper_spec_limit": 50.0,
+            "lower_spec_limit": 0.0,
+            "correlation_id": "SIGNAL_123"
+        }
+        """
+        try:
+            if not self.statistical_monitor:
+                return Response(
+                    {'error': 'Statistical monitor not available'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            # Build measurement from request
+            measurement_data = {
+                'process_name': request.data.get('process_name'),
+                'measurement_value': float(request.data.get('measurement_value')),
+                'measurement_unit': request.data.get('measurement_unit', ''),
+                'target_value': float(request.data.get('target_value')),
+                'upper_spec_limit': float(request.data.get('upper_spec_limit')),
+                'lower_spec_limit': float(request.data.get('lower_spec_limit')),
+                'timestamp': datetime.now().isoformat(),
+                'correlation_id': request.data.get('correlation_id', f'API_{int(datetime.now().timestamp())}')
+            }
+            
+            # Validate required fields
+            required_fields = ['process_name', 'measurement_value', 'target_value', 'upper_spec_limit', 'lower_spec_limit']
+            for field in required_fields:
+                if field not in request.data or request.data[field] is None:
+                    return Response(
+                        {'error': f'Missing required field: {field}'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Record measurement
+            success = self.statistical_monitor.record_measurement(measurement_data)
+            
+            if success:
+                # Also save to Django model for audit trail
+                try:
+                    UCellQualityMeasurement.objects.create(
+                        process_name=measurement_data['process_name'],
+                        measurement_value=measurement_data['measurement_value'],
+                        measurement_unit=measurement_data['measurement_unit'],
+                        target_value=measurement_data['target_value'],
+                        upper_spec_limit=measurement_data['upper_spec_limit'],
+                        lower_spec_limit=measurement_data['lower_spec_limit'],
+                        within_spec=(measurement_data['lower_spec_limit'] <= measurement_data['measurement_value'] <= measurement_data['upper_spec_limit']),
+                        correlation_id=measurement_data['correlation_id']
+                    )
+                except Exception as db_error:
+                    logger.warning(f"Django model save failed: {db_error}")
+                
+                logger.info(
+                    f"Statistical measurement recorded: {measurement_data['process_name']} = {measurement_data['measurement_value']}{measurement_data['measurement_unit']}",
+                    extra={'correlation_id': measurement_data['correlation_id']}
+                )
+                
+                return Response({
+                    'success': True,
+                    'message': 'Measurement recorded successfully',
+                    'process_name': measurement_data['process_name'],
+                    'measurement_value': measurement_data['measurement_value'],
+                    'correlation_id': measurement_data['correlation_id'],
+                    'timestamp': measurement_data['timestamp']
+                })
+            else:
+                return Response(
+                    {'error': 'Failed to record measurement'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+        except ValueError as e:
+            return Response(
+                {'error': f'Invalid numeric value: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Statistical measurement recording failed: {str(e)}")
+            return Response(
+                {'error': f'Measurement recording failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def process_capability(self, request):
+        """
+        Calculate process capability (Cp, Cpk) for a process
+        
+        Query parameters:
+        - process_name: Name of the process
+        - hours_back: Hours of data to analyze (default: 24)
+        """
+        try:
+            if not self.statistical_monitor:
+                return Response(
+                    {'error': 'Statistical monitor not available'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            process_name = request.query_params.get('process_name')
+            if not process_name:
+                return Response(
+                    {'error': 'process_name query parameter is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            hours_back = float(request.query_params.get('hours_back', 24.0))
+            
+            capability = self.statistical_monitor.calculate_process_capability(process_name, hours_back)
+            
+            if capability:
+                logger.info(
+                    f"Process capability calculated: {process_name} Cpk={capability['cpk']:.3f}",
+                    extra={'correlation_id': capability['correlation_id']}
+                )
+                return Response(capability)
+            else:
+                return Response(
+                    {'error': f'Insufficient data for process {process_name}'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+        except ValueError as e:
+            return Response(
+                {'error': f'Invalid parameter value: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Process capability calculation failed: {str(e)}")
+            return Response(
+                {'error': f'Capability calculation failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def six_sigma_report(self, request):
+        """
+        Generate comprehensive Six Sigma quality report
+        """
+        try:
+            if not self.statistical_monitor:
+                return Response(
+                    {'error': 'Statistical monitor not available'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            report = self.statistical_monitor.generate_six_sigma_report()
+            
+            logger.info(
+                f"Six Sigma report generated - Sigma: {report['overall_sigma_level']:.1f}, DPMO: {report['total_dpmo']:.1f}",
+                extra={'correlation_id': report['correlation_id']}
+            )
+            
+            return Response(report)
+            
+        except Exception as e:
+            logger.error(f"Six Sigma report generation failed: {str(e)}")
+            return Response(
+                {'error': f'Report generation failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def monitoring_status(self, request):
+        """
+        Get current statistical monitoring status
+        """
+        try:
+            if not self.statistical_monitor:
+                return Response({
+                    'monitoring_active': False,
+                    'error': 'Statistical monitor not available'
+                })
+            
+            status_data = self.statistical_monitor.get_process_status()
+            
+            # Add FoxBox Framework™ metadata
+            status_data.update({
+                'foxbox_framework_version': '1.0',
+                'above_robust_compliant': True,
+                'production_config': self.PRODUCTION_CONFIG,
+                'u_cell_5_status': 'OPERATIONAL'
+            })
+            
+            return Response(status_data)
+            
+        except Exception as e:
+            logger.error(f"Monitoring status check failed: {str(e)}")
+            return Response(
+                {'error': f'Status check failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['post'])
+    def bulk_record_measurements(self, request):
+        """
+        Record multiple measurements in a single request for performance
+        
+        Expected payload:
+        {
+            "measurements": [
+                {
+                    "process_name": "signal_processing_latency",
+                    "measurement_value": 23.5,
+                    "measurement_unit": "ms",
+                    "target_value": 25.0,
+                    "upper_spec_limit": 50.0,
+                    "lower_spec_limit": 0.0,
+                    "correlation_id": "SIGNAL_123"
+                },
+                ...
+            ]
+        }
+        """
+        try:
+            if not self.statistical_monitor:
+                return Response(
+                    {'error': 'Statistical monitor not available'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            measurements = request.data.get('measurements', [])
+            if not measurements:
+                return Response(
+                    {'error': 'measurements array is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            results = []
+            successful_count = 0
+            
+            for i, measurement_data in enumerate(measurements):
+                try:
+                    # Add timestamp if not provided
+                    if 'timestamp' not in measurement_data:
+                        measurement_data['timestamp'] = datetime.now().isoformat()
+                    
+                    # Add correlation_id if not provided
+                    if 'correlation_id' not in measurement_data:
+                        measurement_data['correlation_id'] = f'BULK_{int(datetime.now().timestamp())}_{i}'
+                    
+                    success = self.statistical_monitor.record_measurement(measurement_data)
+                    
+                    if success:
+                        successful_count += 1
+                        results.append({
+                            'index': i,
+                            'success': True,
+                            'process_name': measurement_data['process_name'],
+                            'correlation_id': measurement_data['correlation_id']
+                        })
+                    else:
+                        results.append({
+                            'index': i,
+                            'success': False,
+                            'error': 'Recording failed',
+                            'process_name': measurement_data.get('process_name', 'UNKNOWN')
+                        })
+                        
+                except Exception as measurement_error:
+                    results.append({
+                        'index': i,
+                        'success': False,
+                        'error': str(measurement_error),
+                        'process_name': measurement_data.get('process_name', 'UNKNOWN')
+                    })
+            
+            logger.info(f"Bulk measurement recording completed: {successful_count}/{len(measurements)} successful")
+            
+            return Response({
+                'total_measurements': len(measurements),
+                'successful_count': successful_count,
+                'failed_count': len(measurements) - successful_count,
+                'results': results
+            })
+            
+        except Exception as e:
+            logger.error(f"Bulk measurement recording failed: {str(e)}")
+            return Response(
+                {'error': f'Bulk recording failed: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
