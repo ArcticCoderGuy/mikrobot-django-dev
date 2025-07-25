@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-07-22T15:14:15.497033",
+  "timestamp": "2025-07-24T08:14:45.593098",
   "tests": {
     "django_server": {
       "status": "PASS",
       "details": "HTTP 200",
-      "response_time": 2.097796
+      "response_time": 2.409554
     },
     "main_dashboard": {
       "status": "PASS",
@@ -12,22 +12,22 @@
         "/dashboard/": {
           "status": "PASS",
           "status_code": 200,
-          "response_time": 2.08276
+          "response_time": 2.187938
         },
         "/dashboard/main/": {
           "status": "PASS",
           "status_code": 200,
-          "response_time": 2.080709
+          "response_time": 2.72794
         },
         "/dashboard/settings/": {
           "status": "PASS",
           "status_code": 200,
-          "response_time": 2.054193
+          "response_time": 2.084355
         },
         "/dashboard/qa/": {
           "status": "PASS",
           "status_code": 200,
-          "response_time": 2.02665
+          "response_time": 2.11902
         }
       },
       "pages_tested": 4
@@ -40,7 +40,7 @@
     "database": {
       "status": "PASS",
       "details": {
-        "signals": 5,
+        "signals": 22,
         "trades": 1,
         "connection": true
       }
